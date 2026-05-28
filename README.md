@@ -25,3 +25,49 @@
 ۱. ابتدا خط فرمان PowerShell را باز کنید و با دستور `cd` به پوشه مخزن گیت خود بروید:
    ```bash
    cd path/to/your/repo
+```
+۲. کد اسکریپت را در یک فایل با نام generate_commits.ps1 ذخیره کنید یا دستورات زیر را مستقیماً در خط فرمان کپی و اجرا کنید:
+```powershell
+$startDate = Get-Date "2022-03-04" // joined github date +1
+$endDate = Get-Date
+
+$currentDate = $startDate
+
+while ($currentDate -le $endDate) {
+
+    Write-Host "Generating commits for $($currentDate.ToString('yyyy-MM-dd'))"
+
+    for ($i = 1; $i -le 100; $i++) {
+
+        $timestamp = Get-Date -Format "yyyyMMddHHmmssffff"
+
+        Add-Content -Path "data.txt" -Value "$timestamp commit $i"
+
+        git add data.txt
+
+        $fakeDate = $currentDate.AddMinutes($i)
+
+        $env:GIT_AUTHOR_DATE = $fakeDate.ToString("yyyy-MM-dd HH:mm:ss")
+        $env:GIT_COMMITTER_DATE = $fakeDate.ToString("yyyy-MM-dd HH:mm:ss")
+
+        git commit -m "commit $i on $($currentDate.ToString('yyyy-MM-dd'))"
+    }
+
+    $currentDate = $currentDate.AddDays(1)
+}
+```
+
+۳. پس از پایان اجرای اسکریپت، برای انتقال کامیت‌ها به گیت‌هاب، دستور زیر را اجرا کنید:
+```bash
+git push origin main
+```
+
+(نکته: اگر نام شاخه اصلی شما چیز دیگری مانند master است، آن را جایگزین main کنید).
+
+⚙️ شخصی‌سازی
+تغییر تاریخ شروع: برای تغییر تاریخ شروع کامیت‌ها، خط اول اسکریپت (2022-03-04) را به تاریخ دلخواه خود تغییر دهید.
+
+تعداد کامیت در روز: در خط حلقه for، عدد 100 نشان‌دهنده تعداد کامیت در هر روز است. می‌توانید این عدد را کم یا زیاد کنید.
+
+⚠️ نکات مهم (سلب مسئولیت)
+توجه: این اسکریپت صرفاً برای اهداف آموزشی، آزمایش قابلیت‌های متادیتا در گیت و یا زیباسازی ظاهری پروفایل ساخته شده است. این کامیت‌ها نشان‌دهنده فعالیت واقعی برنامه‌نویسی نیستند. صبور باشید؛ فرآیند Push کردن تعداد زیادی کامیت ممکن است کمی زمان‌بر باشد.
